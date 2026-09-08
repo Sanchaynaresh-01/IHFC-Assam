@@ -421,12 +421,22 @@ const AdminDashboard = () => {
                           <span>Verify UDISE</span>
                         </button>
                       )}
-                      {uStatus === 'format_valid' && (
+                      {(uStatus === 'format_valid' || uStatus === 'needs_review') && (
                         <button
                           onClick={() => handleUpdateUdiseStatus(sch.id || sch._id, 'needs_review')}
-                          className="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 text-xs font-semibold transition-all cursor-pointer"
+                          className="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 text-xs font-semibold transition-all cursor-pointer flex items-center gap-1"
                         >
-                          Request Clarification
+                          <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
+                          <span>Request Clarification</span>
+                        </button>
+                      )}
+                      {uStatus !== 'rejected' && uStatus !== 'verified' && (
+                        <button
+                          onClick={() => handleUpdateUdiseStatus(sch.id || sch._id, 'rejected')}
+                          className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-300 text-xs font-semibold transition-all cursor-pointer flex items-center gap-1"
+                        >
+                          <XCircle className="w-3.5 h-3.5 text-rose-600" />
+                          <span>Reject UDISE</span>
                         </button>
                       )}
 

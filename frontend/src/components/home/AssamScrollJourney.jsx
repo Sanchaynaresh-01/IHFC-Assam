@@ -9,6 +9,15 @@ import {
 
 gsap.registerPlugin(ScrollTrigger);
 
+// SchoolIcon must be defined BEFORE STAGES array to avoid hoisting issues
+function SchoolIcon(props) {
+  return (
+    <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+    </svg>
+  );
+}
+
 export const STAGES = [
   {
     step: '01',
@@ -132,14 +141,6 @@ export const STAGES = [
   }
 ];
 
-function SchoolIcon(props) {
-  return (
-    <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-    </svg>
-  );
-}
-
 const AssamScrollJourney = () => {
   const containerRef = useRef(null);
   const pathRef = useRef(null);
@@ -201,7 +202,7 @@ const AssamScrollJourney = () => {
         trigger: containerEl,
         start: 'top top',
         end: 'bottom bottom',
-        scrub: 0.4,
+        scrub: 0.6,
         onUpdate: (self) => {
           const progress = Math.min(1, Math.max(0, self.progress));
           setScrollProgress(progress);

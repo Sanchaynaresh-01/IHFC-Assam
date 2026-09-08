@@ -717,6 +717,28 @@ const RegisterSchool = () => {
                         </div>
                       </div>
 
+                      {/* UDISE Verification Status Banner */}
+                      <div className="p-4 rounded-2xl bg-blue-50/80 border border-blue-200 flex items-start gap-3">
+                        <div className="mt-0.5 shrink-0">
+                          <ShieldCheck className="w-5 h-5 text-blue-700" />
+                        </div>
+                        <div className="text-xs space-y-1">
+                          <div className="font-bold text-blue-900 flex items-center gap-2">
+                            UDISE ID Status:
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-100 border border-blue-300 text-blue-800 font-bold">
+                              <CheckCircle2 className="w-3 h-3 text-blue-600" />
+                              Format Validated ✓
+                            </span>
+                          </div>
+                          <p className="text-blue-700 leading-relaxed">
+                            Your UDISE ID <strong className="font-mono">{formData.udise_school_id}</strong> passes the mandatory 11-digit Assam format check (prefix 18). An AFIP administrator will officially verify your UDISE against government records after submission.
+                          </p>
+                          <p className="text-blue-600 italic">
+                            You will receive a portal notification once your UDISE is officially verified.
+                          </p>
+                        </div>
+                      </div>
+
                       {/* Terms Acceptance */}
                       <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200/80">
                         <label className="flex items-start gap-3 cursor-pointer text-xs text-slate-700 leading-relaxed">
