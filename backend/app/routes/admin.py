@@ -144,6 +144,48 @@ def update_school_status(school_id):
         message=f"School status updated to '{new_status}' successfully."
     )
 
+@admin_bp.route("/schools/<school_id>/udise-status", methods=["PATCH"])
+@role_required("admin")
+def update_school_udise_status(school_id):
+    user_id = get_jwt_identity()
+    db = get_db()
+    oid = parse_object_id(school_id)
+    school = db.schools.find_one({"_id": oid})
+    if not school:
+        return api_error("NOT_FOUND", "School not found.", status_code=404)
+
+    data = request.get_json() or {}
+    new_status = data.get("udise_verification_status")
+    allowed_statuses = ["verified", "rejected", "needs_review", "format_valid", "pending"]
+    if new_status not in allowed_statuses:
+        return api_error("VALIDATION_ERROR", f"Status must be one of: {allowed_statuses}", status_code=400)
+
+    now = datetime.utcnow()
+    update_doc = {
+        "udise_verification_status": new_status,
+        "udise_verified_at": now if new_status == "verified" else school.get("udise_verified_at"),
+        "udise_verified_by": str(user_id) if new_status == "verified" else school.get("udise_verified_by"),
+        "udise_verification_notes": data.get("notes", "").strip(),
+        "updated_at": now
+    }
+
+    db.schools.update_one({"_id": oid}, {"$set": update_doc})
+
+    log_audit_event(
+        str(user_id), "admin", "UDISE_STATUS_UPDATED", "schools", str(oid),
+        {"udise_school_id": school.get("udise_school_id"), "udise_verification_status": new_status}
+    )
+
+    return api_response(
+        data={
+            "school_id": str(oid),
+            "udise_school_id": school.get("udise_school_id"),
+            "udise_verification_status": new_status,
+            "udise_verified_at": now.isoformat() if new_status == "verified" else None
+        },
+        message=f"UDISE verification status updated to '{new_status}' successfully."
+    )
+
 @admin_bp.route("/evaluators", methods=["GET"])
 @role_required("admin")
 def list_evaluators():

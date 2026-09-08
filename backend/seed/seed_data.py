@@ -58,6 +58,11 @@ def seed_database(app=None):
     primary_school = db.schools.insert_one({
         "user_id": school_user.inserted_id,
         "school_name": "Brahmaputra Public School",
+        "udise_school_id": "18010100101",
+        "udise_verification_status": "verified",
+        "udise_verified_at": now,
+        "udise_verified_by": str(admin_res.inserted_id),
+        "udise_verification_source": "State Educational Department Registry",
         "school_code": "AFIP-AS-KAM-00001",
         "school_type": "Government Model School",
         "board": "SEBA",
@@ -88,19 +93,19 @@ def seed_database(app=None):
 
     # 3. Additional 9 Schools across Assam
     other_schools_data = [
-        ("Kaziranga Valley Academy", "Golaghat", "GOL", "CBSE", "approved"),
-        ("Dibrugarh Higher Secondary School", "Dibrugarh", "DIB", "SEBA", "approved"),
-        ("Jorhat Technical High School", "Jorhat", "JOR", "SEBA", "approved"),
-        ("Silchar Govt Boys Higher Secondary", "Cachar", "CAC", "SEBA", "approved"),
-        ("Tezpur Collegiate School", "Sonitpur", "SON", "SEBA", "approved"),
-        ("Nagaon Innovation School", "Nagaon", "NAG", "CBSE", "approved"),
-        ("Sivasagar Heritage Vidyalaya", "Sivasagar", "SIV", "SEBA", "approved"),
-        ("Barpeta Green Academy", "Barpeta", "BAR", "SEBA", "pending"),
-        ("Tinsukia Modern Academy", "Tinsukia", "TIN", "CBSE", "pending")
+        ("Kaziranga Valley Academy", "Golaghat", "GOL", "CBSE", "approved", "18020100202", "verified"),
+        ("Dibrugarh Higher Secondary School", "Dibrugarh", "DIB", "SEBA", "approved", "18030100303", "verified"),
+        ("Jorhat Technical High School", "Jorhat", "JOR", "SEBA", "approved", "18040100404", "verified"),
+        ("Silchar Govt Boys Higher Secondary", "Cachar", "CAC", "SEBA", "approved", "18050100505", "verified"),
+        ("Tezpur Collegiate School", "Sonitpur", "SON", "SEBA", "approved", "18060100606", "verified"),
+        ("Nagaon Innovation School", "Nagaon", "NAG", "CBSE", "approved", "18070100707", "verified"),
+        ("Sivasagar Heritage Vidyalaya", "Sivasagar", "SIV", "SEBA", "approved", "18080100808", "verified"),
+        ("Barpeta Green Academy", "Barpeta", "BAR", "SEBA", "pending", "18090100909", "format_valid"),
+        ("Tinsukia Modern Academy", "Tinsukia", "TIN", "CBSE", "pending", "18100101010", "needs_review")
     ]
 
     school_ids = [primary_school_id]
-    for idx, (s_name, dist, d_code, board, s_status) in enumerate(other_schools_data, start=2):
+    for idx, (s_name, dist, d_code, board, s_status, s_udise, u_status) in enumerate(other_schools_data, start=2):
         s_user = db.users.insert_one({
             "email": f"school_{dist.lower()}@afip.demo",
             "password_hash": hash_password("School@123"),
@@ -114,6 +119,11 @@ def seed_database(app=None):
         sch_res = db.schools.insert_one({
             "user_id": s_user.inserted_id,
             "school_name": s_name,
+            "udise_school_id": s_udise,
+            "udise_verification_status": u_status,
+            "udise_verified_at": now if u_status == "verified" else None,
+            "udise_verified_by": str(admin_res.inserted_id) if u_status == "verified" else None,
+            "udise_verification_source": "State Educational Department Registry",
             "school_code": sc_code,
             "school_type": "Government Model School",
             "board": board,

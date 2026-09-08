@@ -34,7 +34,8 @@ const roleMeta = {
     color: 'from-teal-900 to-slate-950',
     accent: 'text-teal-800 bg-teal-100',
     demo: { email: 'student@afip.demo', pass: 'Student@123' },
-    redirect: '/student/dashboard'
+    redirect: '/student/dashboard',
+    registerLink: '/register/student'
   },
   evaluator: {
     title: 'Evaluator & Jury Panel',
@@ -94,7 +95,33 @@ const Login = () => {
     <div className="min-h-screen bg-[#faf8f5] text-slate-900 flex flex-col">
       <Navbar />
 
-      <main className="flex-1 pt-32 pb-20 flex items-center justify-center px-4 sm:px-6">
+      <main className="flex-1 pt-32 pb-20 flex flex-col items-center justify-center px-4 sm:px-6">
+        {/* Role Switcher Tabs */}
+        <div className="flex items-center gap-1.5 p-1 bg-slate-200/80 rounded-2xl mb-6 max-w-md w-full border border-slate-300/60 shadow-xs">
+          {[
+            { key: 'student', label: 'Student' },
+            { key: 'school', label: 'School' },
+            { key: 'evaluator', label: 'Evaluator' },
+            { key: 'admin', label: 'Admin' }
+          ].map((r) => (
+            <button
+              key={r.key}
+              type="button"
+              onClick={() => {
+                setErrorMessage('');
+                navigate(`/login/${r.key}`);
+              }}
+              className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
+                role === r.key
+                  ? 'bg-white text-slate-900 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              {r.label}
+            </button>
+          ))}
+        </div>
+
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}

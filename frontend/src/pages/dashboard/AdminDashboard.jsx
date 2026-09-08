@@ -115,6 +115,16 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleUpdateUdiseStatus = async (schoolId, newStatus) => {
+    try {
+      const res = await api.patch(`/admin/schools/${schoolId}/udise-status`, { udise_verification_status: newStatus });
+      addToast(res.data.message || `UDISE status updated to ${newStatus}`, 'success');
+      fetchSchools();
+    } catch (err) {
+      addToast(err.response?.data?.error?.message || 'UDISE update failed', 'error');
+    }
+  };
+
   const handleUpdateEvaluatorStatus = async (evalId, newStatus) => {
     try {
       const res = await api.patch(`/admin/evaluators/${evalId}/status`, { status: newStatus });
@@ -351,49 +361,96 @@ const AdminDashboard = () => {
             </div>
 
             <div className="divide-y divide-slate-100">
-              {schools.map((sch) => (
-                <div key={sch.id || sch._id} className="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold text-slate-900">{sch.school_name}</span>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
-                        sch.status === 'approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
-                      }`}>
-                        {sch.status}
-                      </span>
+              {schools.map((sch) => {
+                const uStatus = sch.udise_verification_status || 'format_valid';
+                return (
+                  <div key={sch.id || sch._id} className="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="space-y-1.5 max-w-2xl">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-sm font-bold text-slate-900">{sch.school_name}</span>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
+                          sch.status === 'approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                        }`}>
+                          School: {sch.status}
+                        </span>
+
+                        {/* UDISE Verification Status Pill */}
+                        <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 ${
+                          uStatus === 'verified'
+                            ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'
+                            : uStatus === 'format_valid'
+                            ? 'bg-blue-50 text-blue-800 border border-blue-200'
+                            : uStatus === 'needs_review'
+                            ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                            : 'bg-rose-100 text-rose-800 border border-rose-300'
+                        }`}>
+                          {uStatus === 'verified' && <CheckCircle2 className="w-3 h-3 text-emerald-600" />}
+                          {uStatus === 'format_valid' && <Clock className="w-3 h-3 text-blue-600" />}
+                          {uStatus === 'needs_review' && <AlertCircle className="w-3 h-3 text-amber-600" />}
+                          <span>UDISE: {uStatus === 'verified' ? '✓ Officially Verified' : uStatus.replace('_', ' ').toUpperCase()}</span>
+                        </span>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                        <span>UDISE: <strong className="font-mono text-emerald-900">{sch.udise_school_id || 'Not recorded'}</strong></span>
+                        <span>•</span>
+                        <span>Code: <strong className="font-mono text-emerald-800">{sch.school_code || 'Unassigned'}</strong></span>
+                        <span>•</span>
+                        <span>District: <strong>{sch.district}</strong></span>
+                        <span>•</span>
+                        <span>Type: {sch.school_type}</span>
+                        <span>•</span>
+                        <span>Email: {sch.official_email}</span>
+                      </div>
+
+                      {sch.udise_verified_at && (
+                        <div className="text-[11px] text-emerald-700">
+                          Verified at {new Date(sch.udise_verified_at).toLocaleDateString()}
+                        </div>
+                      )}
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
-                      <span>Code: <strong className="font-mono text-emerald-800">{sch.school_code || 'Unassigned'}</strong></span>
-                      <span>•</span>
-                      <span>District: <strong>{sch.district}</strong></span>
-                      <span>•</span>
-                      <span>Type: {sch.school_type}</span>
-                      <span>•</span>
-                      <span>Email: {sch.official_email}</span>
+                    <div className="flex flex-wrap items-center gap-2 shrink-0">
+                      {/* UDISE Review Actions */}
+                      {uStatus !== 'verified' && (
+                        <button
+                          onClick={() => handleUpdateUdiseStatus(sch.id || sch._id, 'verified')}
+                          className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>Verify UDISE</span>
+                        </button>
+                      )}
+                      {uStatus === 'format_valid' && (
+                        <button
+                          onClick={() => handleUpdateUdiseStatus(sch.id || sch._id, 'needs_review')}
+                          className="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 text-xs font-semibold transition-all cursor-pointer"
+                        >
+                          Request Clarification
+                        </button>
+                      )}
+
+                      {/* School Approval */}
+                      {sch.status === 'pending' && (
+                        <button
+                          onClick={() => handleUpdateSchoolStatus(sch.id || sch._id, 'approved')}
+                          className="px-3.5 py-1.5 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold shadow-xs cursor-pointer"
+                        >
+                          Approve School
+                        </button>
+                      )}
+                      {sch.status === 'approved' && (
+                        <button
+                          onClick={() => handleUpdateSchoolStatus(sch.id || sch._id, 'suspended')}
+                          className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-600 text-xs font-semibold cursor-pointer"
+                        >
+                          Suspend
+                        </button>
+                      )}
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-2 shrink-0">
-                    {sch.status === 'pending' && (
-                      <button
-                        onClick={() => handleUpdateSchoolStatus(sch.id || sch._id, 'approved')}
-                        className="px-3.5 py-1.5 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold shadow-xs cursor-pointer"
-                      >
-                        Approve &amp; Generate Code
-                      </button>
-                    )}
-                    {sch.status === 'approved' && (
-                      <button
-                        onClick={() => handleUpdateSchoolStatus(sch.id || sch._id, 'suspended')}
-                        className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-600 text-xs font-semibold cursor-pointer"
-                      >
-                        Suspend
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

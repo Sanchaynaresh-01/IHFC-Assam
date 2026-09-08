@@ -14,6 +14,7 @@ import Innovations from '../pages/Innovations';
 import Login from '../pages/auth/Login';
 import RegisterSchool from '../pages/auth/RegisterSchool';
 import RegisterEvaluator from '../pages/auth/RegisterEvaluator';
+import RegisterStudent from '../pages/auth/RegisterStudent';
 
 // Dashboards
 import SchoolDashboard from '../pages/dashboard/SchoolDashboard';
@@ -43,6 +44,7 @@ const AppRoutes = () => {
       <Route path="/login/:role" element={<Login />} />
       <Route path="/register/school" element={<RegisterSchool />} />
       <Route path="/register/evaluator" element={<RegisterEvaluator />} />
+      <Route path="/register/student" element={<RegisterStudent />} />
 
       {/* Protected Role Dashboards */}
       <Route

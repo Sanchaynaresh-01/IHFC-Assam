@@ -50,6 +50,7 @@ def test_school_login_and_profile(client):
 def test_school_duplicate_email_registration(client):
     res = client.post("/api/v1/schools/register", json={
         "school_name": "Duplicate Test School",
+        "udise_school_id": "18110100001",
         "school_type": "Private",
         "board": "CBSE",
         "district": "Kamrup",
@@ -68,14 +69,85 @@ def test_school_duplicate_email_registration(client):
     assert res.status_code == 409
     assert "already exists" in res.get_json()["error"]["message"]
 
+def test_school_registration_non_assam_rejected(client):
+    res = client.post("/api/v1/schools/register", json={
+        "school_name": "Delhi Public School",
+        "udise_school_id": "18110100099",
+        "school_type": "Private",
+        "board": "CBSE",
+        "state": "Delhi",  # Non-Assam
+        "district": "Kamrup",
+        "pin_code": "110001",
+        "official_email": "delhi.school@test.com",
+        "official_phone": "+91 99999 11111",
+        "principal_name": "Delhi Principal",
+        "principal_email": "dp@delhi.edu",
+        "principal_phone": "+91 99999 22222",
+        "coordinator_name": "Delhi Coord",
+        "coordinator_email": "dc@delhi.edu",
+        "coordinator_phone": "+91 99999 33333",
+        "password": "School@123",
+        "confirm_password": "School@123"
+    })
+    assert res.status_code == 400
+    assert "strictly restricted to schools located in Assam" in res.get_json()["error"]["message"]
+
+def test_school_registration_invalid_udise_rejected(client):
+    res = client.post("/api/v1/schools/register", json={
+        "school_name": "Invalid UDISE School",
+        "udise_school_id": "12345",  # Invalid format (not 11 digits starting with 18)
+        "school_type": "Government Model School",
+        "board": "SEBA",
+        "state": "Assam",
+        "district": "Kamrup",
+        "pin_code": "781001",
+        "official_email": "invalid.udise@afip.demo",
+        "official_phone": "+91 99999 44444",
+        "principal_name": "Test Principal",
+        "principal_email": "tp@invalid.edu",
+        "principal_phone": "+91 99999 55555",
+        "coordinator_name": "Test Coord",
+        "coordinator_email": "tc@invalid.edu",
+        "coordinator_phone": "+91 99999 66666",
+        "password": "School@123",
+        "confirm_password": "School@123"
+    })
+    assert res.status_code == 400
+    assert "valid 11-digit UDISE School ID" in res.get_json()["error"]["message"]
+
+def test_school_registration_duplicate_udise_rejected(client):
+    res = client.post("/api/v1/schools/register", json={
+        "school_name": "Duplicate UDISE School",
+        "udise_school_id": "18010100101",  # Already registered to Brahmaputra Public School
+        "school_type": "Government Model School",
+        "board": "SEBA",
+        "state": "Assam",
+        "district": "Jorhat",
+        "pin_code": "785001",
+        "official_email": "dup.udise@afip.demo",
+        "official_phone": "+91 99999 77777",
+        "principal_name": "Test Principal",
+        "principal_email": "tp@dup.edu",
+        "principal_phone": "+91 99999 88888",
+        "coordinator_name": "Test Coord",
+        "coordinator_email": "tc@dup.edu",
+        "coordinator_phone": "+91 99999 99999",
+        "password": "School@123",
+        "confirm_password": "School@123"
+    })
+    assert res.status_code == 409
+    assert "already registered" in res.get_json()["error"]["message"]
+
 def test_admin_approves_school_generates_unique_code(client):
     admin_token = get_auth_token(client, "admin@afip.demo", "Admin@123")
     
-    # Register a new school in Jorhat
+    # Register a new school in Golaghat
     res = client.post("/api/v1/schools/register", json={
         "school_name": "Kaziranga Public Model School",
-        "school_type": "Government",
+        "udise_school_id": "18120100002",
+        "school_type": "Government Model School",
         "board": "SEBA",
+        "state": "Assam",
         "district": "Golaghat",
         "pin_code": "785621",
         "official_email": "kaziranga.new@afip.demo",
@@ -91,6 +163,15 @@ def test_admin_approves_school_generates_unique_code(client):
     })
     assert res.status_code == 201
     school_id = res.get_json()["data"]["school_id"]
+
+    # Admin verifies UDISE
+    udise_res = client.patch(
+        f"/api/v1/admin/schools/{school_id}/udise-status",
+        headers={"Authorization": f"Bearer {admin_token}"},
+        json={"udise_verification_status": "verified"}
+    )
+    assert udise_res.status_code == 200
+    assert udise_res.get_json()["data"]["udise_verification_status"] == "verified"
 
     # Admin approves
     approve_res = client.patch(
@@ -239,3 +320,32 @@ def test_leaderboard_visibility_toggle(client):
 
     # Reset back to public for users
     client.patch("/api/v1/admin/leaderboard-visibility", headers={"Authorization": f"Bearer {admin_token}"}, json={"is_public": True})
+
+def test_student_registration_with_school_code(client):
+    # Register student under Brahmaputra Public School (AFIP-AS-KAM-00001)
+    res = client.post("/api/v1/auth/register-student", json={
+        "school_code": "AFIP-AS-KAM-00001",
+        "team_name": "Eco Innovators Assam",
+        "category": "IX-X",
+        "leader_name": "Priyanka Kalita",
+        "leader_email": "priyanka.kalita@afip.demo",
+        "leader_phone": "+91 94350 11223",
+        "leader_grade": "Class IX",
+        "password": "Student@123",
+        "confirm_password": "Student@123",
+        "members": [{"name": "Debajit Bora", "email": "debajit.b@afip.demo", "grade": "Class IX"}]
+    })
+    assert res.status_code == 201
+    data = res.get_json()["data"]
+    assert data["team_code"].startswith("AFIP-T-")
+    assert data["school_name"] == "Brahmaputra Public School"
+
+    # Test student can log in
+    token = get_auth_token(client, "priyanka.kalita@afip.demo", "Student@123")
+    assert token is not None
+    me_res = client.get("/api/v1/teams/my-team", headers={"Authorization": f"Bearer {token}"})
+    assert me_res.status_code == 200
+    my_team = me_res.get_json()["data"]
+    assert my_team["team"]["team_name"] == "Eco Innovators Assam"
+    assert my_team["school"]["school_code"] == "AFIP-AS-KAM-00001"
+

@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -8,13 +9,31 @@ from app.utils.audit import log_audit_event
 
 schools_bp = Blueprint("schools", __name__, url_prefix="/api/v1/schools")
 
+ASSAM_DISTRICTS = {
+    'Baksa', 'Barpeta', 'Biswanath', 'Bongaigaon', 'Cachar',
+    'Charaideo', 'Chirang', 'Darrang', 'Dhemaji', 'Dhubri', 'Dibrugarh',
+    'Dima Hasao', 'Goalpara', 'Golaghat', 'Hailakandi', 'Hojai', 'Jorhat',
+    'Kamrup', 'Kamrup Metropolitan', 'Karbi Anglong', 'Karimganj', 'Kokrajhar',
+    'Lakhimpur', 'Majuli', 'Morigaon', 'Nagaon', 'Nalbari', 'Sivasagar',
+    'Sonitpur', 'South Salmara-Mankachar', 'Tinsukia', 'Udalguri', 'West Karbi Anglong'
+}
+
 @schools_bp.route("/register", methods=["POST"])
 def register_school():
     data = request.get_json() or {}
 
+    # Strict Assam-only validation: Never trust frontend
+    state = data.get("state", "Assam")
+    if state != "Assam":
+        return api_error("ELIGIBILITY_ERROR", "Registration is strictly restricted to schools located in Assam.", status_code=400)
+
+    district = data.get("district", "").strip()
+    if not district or district not in ASSAM_DISTRICTS:
+        return api_error("VALIDATION_ERROR", "Invalid district. Please select one of the 33 official Assam districts.", status_code=400)
+
     # Validation
     required_fields = [
-        "school_name", "school_type", "board", "district", "pin_code",
+        "school_name", "udise_school_id", "school_type", "board", "district", "pin_code",
         "official_email", "official_phone", "principal_name", "principal_email",
         "principal_phone", "coordinator_name", "coordinator_email",
         "coordinator_phone", "password", "confirm_password"
@@ -26,8 +45,27 @@ def register_school():
     if data.get("password") != data.get("confirm_password"):
         return api_error("VALIDATION_ERROR", "Passwords do not match.", status_code=400)
 
-    email = data.get("official_email", "").strip().lower()
+    # Password security check
+    password = data.get("password", "")
+    if len(password) < 8:
+        return api_error("WEAK_PASSWORD", "Password must be at least 8 characters in length.", status_code=400)
+
+    # Mandatory UDISE format check: exactly 11 digits starting with Assam state code 18
+    udise = str(data.get("udise_school_id", "")).strip()
+    if not re.match(r"^18\d{9}$", udise):
+        return api_error(
+            "INVALID_UDISE",
+            "Please enter a valid 11-digit UDISE School ID for Assam (must start with state code '18').",
+            status_code=400
+        )
+
     db = get_db()
+
+    # Duplicate UDISE check
+    if db.schools.find_one({"udise_school_id": udise}):
+        return api_error("DUPLICATE_UDISE", "This UDISE School ID is already registered.", status_code=409)
+
+    email = data.get("official_email", "").strip().lower()
     if db.users.find_one({"email": email}):
         return api_error("DUPLICATE_EMAIL", "A school account with this official email already exists.", status_code=409)
 
@@ -35,9 +73,9 @@ def register_school():
     now = datetime.utcnow()
     user_doc = {
         "email": email,
-        "password_hash": hash_password(data["password"]),
+        "password_hash": hash_password(password),
         "role": "school",
-        "name": data["school_name"],
+        "name": data["school_name"].strip(),
         "status": "pending",
         "created_at": now,
         "updated_at": now
@@ -45,29 +83,34 @@ def register_school():
     user_result = db.users.insert_one(user_doc)
     user_id = user_result.inserted_id
 
-    # Create school document
+    # Create school document with UDISE verification status
     school_doc = {
         "user_id": user_id,
-        "school_name": data["school_name"],
-        "school_type": data.get("school_type", "Government"),
+        "school_name": data["school_name"].strip(),
+        "udise_school_id": udise,
+        "udise_verification_status": "format_valid",
+        "udise_verified_at": None,
+        "udise_verified_by": None,
+        "udise_verification_source": "Format Validation & Institutional Manual Review",
+        "school_type": data.get("school_type", "Government Model School"),
         "board": data.get("board", "SEBA"),
-        "address_line_1": data.get("address_line_1", ""),
-        "address_line_2": data.get("address_line_2", ""),
-        "district": data.get("district", "Kamrup"),
+        "address_line_1": data.get("address_line_1", "").strip(),
+        "address_line_2": data.get("address_line_2", "").strip(),
+        "district": district,
         "state": "Assam",
-        "pin_code": data.get("pin_code", ""),
+        "pin_code": data.get("pin_code", "").strip(),
         "official_email": email,
-        "official_phone": data.get("official_phone", ""),
-        "website": data.get("website", ""),
+        "official_phone": data.get("official_phone", "").strip(),
+        "website": data.get("website", "").strip(),
         "principal": {
-            "name": data.get("principal_name", ""),
-            "email": data.get("principal_email", ""),
-            "phone": data.get("principal_phone", "")
+            "name": data.get("principal_name", "").strip(),
+            "email": data.get("principal_email", "").strip(),
+            "phone": data.get("principal_phone", "").strip()
         },
         "coordinator": {
-            "name": data.get("coordinator_name", ""),
-            "email": data.get("coordinator_email", ""),
-            "phone": data.get("coordinator_phone", ""),
+            "name": data.get("coordinator_name", "").strip(),
+            "email": data.get("coordinator_email", "").strip(),
+            "phone": data.get("coordinator_phone", "").strip(),
             "designation": data.get("coordinator_designation", "Innovation Mentor")
         },
         "school_code": None,  # Generated only upon admin approval
@@ -82,16 +125,16 @@ def register_school():
         "recipient_role": "admin",
         "recipient_id": None,
         "title": "New School Registration",
-        "message": f"'{data['school_name']}' from {data['district']} has registered and is awaiting approval.",
+        "message": f"'{data['school_name']}' (UDISE: {udise}) from {district} has registered and is awaiting approval.",
         "type": "registration",
         "is_read": False,
         "created_at": now
     })
 
-    log_audit_event(str(user_id), "school", "SCHOOL_REGISTERED", "schools", str(school_result.inserted_id))
+    log_audit_event(str(user_id), "school", "SCHOOL_REGISTERED", "schools", str(school_result.inserted_id), {"udise": udise})
 
     return api_response(
-        data={"school_id": str(school_result.inserted_id), "status": "pending"},
+        data={"school_id": str(school_result.inserted_id), "udise_school_id": udise, "status": "pending"},
         message="Registration submitted successfully. Your application is under review by the administration.",
         status_code=201
     )
