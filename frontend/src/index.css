@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-tea-dark: #1b4332;
+    --color-tea-primary: #2d6a4f;
+    --color-tea-light: #52b788;
+    --color-brahmaputra: #0f2942;
+    --color-brahmaputra-light: #1b4965;
+    --color-assam-sunrise: #f59e0b;
+    --color-assam-warm: #d97706;
+    --color-silk-cream: #faf8f5;
+    --color-silk-card: #ffffff;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: #faf8f5;
+    color: #0f172a;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+}
+
+/* Glassmorphic card styling */
+.glass-nav {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 10px 25px -5px rgba(15, 41, 66, 0.05), 0 8px 10px -6px rgba(15, 41, 66, 0.05);
+}
+
+.glass-card-hover {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 30px -10px rgba(27, 67, 50, 0.12), 0 10px 15px -5px rgba(15, 41, 66, 0.08);
+  border-color: rgba(64, 145, 108, 0.3);
+}
+
+/* Subtle river shimmer animation */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer-text {
+  background: linear-gradient(90deg, #1b4332 0%, #d97706 50%, #1b4332 100%);
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shimmer 6s linear infinite;
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
