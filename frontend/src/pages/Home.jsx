@@ -9,6 +9,7 @@ import InnovationThemes from '../components/home/InnovationThemes';
 import PrizesPreview from '../components/home/PrizesPreview';
 import LeaderboardPreview from '../components/home/LeaderboardPreview';
 import CallToAction from '../components/home/CallToAction';
+import InnovationPathways from '../components/home/InnovationPathways';
 import { ShieldCheck, BookOpen, Users, Compass, ArrowRight, Lightbulb } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -100,6 +101,9 @@ const Home = () => {
             </div>
           </div>
         </section>
+
+        {/* INNOVATION ACCELERATION PATHWAYS */}
+        <InnovationPathways />
 
         {/* 3. MOST IMPORTANT REQUIREMENT: SCROLL-DRIVEN ASSAM ANIMATION EXPERIENCE */}
         <AssamScrollJourney />
