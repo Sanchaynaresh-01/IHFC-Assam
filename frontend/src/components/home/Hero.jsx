@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Sparkles, Trophy, Compass, ShieldCheck, MapPin, Leaf, Shield } from 'lucide-react';
 import ihfcLogo from '../../assets/logos/ihfc-logo.svg';
 import samagraLogo from '../../assets/logos/samagra-shiksha-assam.svg';
+import rhinoImg from '../../assets/rhino-kaziranga.jpg';
 
 const Hero = () => {
   return (
@@ -14,17 +15,18 @@ const Hero = () => {
       <div className="absolute top-40 left-10 w-96 h-96 bg-amber-700/5 blur-3xl rounded-full pointer-events-none" />
 
       {/* ------------------------------------------------------------------ */}
-      {/* LEFT FLANK (DESKTOP): ASSAMESE TEA-GARDEN LADY IN MEKHELA SADOR */}
+      {/* LEFT FLANK (DESKTOP): ASSAMESE TEA-GARDEN LADY IN MEKHELA SADOR    */}
       {/* ------------------------------------------------------------------ */}
       <motion.div
         initial={{ opacity: 0, x: -40 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
-        className="hidden xl:flex flex-col items-center absolute left-3 2xl:left-12 bottom-10 2xl:bottom-14 z-20 pointer-events-auto select-none w-52 2xl:w-60"
+        style={{ width: 'clamp(280px, 23vw, 420px)' }}
+        className="hidden xl:flex flex-col items-end absolute left-0 bottom-0 z-20 pointer-events-auto select-none"
       >
-        <div className="relative group cursor-pointer transition-transform duration-300 hover:scale-105">
+        <div className="relative group cursor-pointer transition-transform duration-300 hover:scale-[1.03] w-full">
           {/* Subtle glow behind figure */}
-          <div className="absolute -inset-4 bg-emerald-500/15 blur-2xl rounded-full" />
+          <div className="absolute -inset-6 bg-emerald-500/10 blur-3xl rounded-full pointer-events-none" />
 
           <svg viewBox="0 0 300 450" className="w-full h-auto drop-shadow-2xl overflow-visible">
             <defs>
@@ -41,7 +43,27 @@ const Hero = () => {
                 <stop offset="0%" stopColor="#dc2626" />
                 <stop offset="100%" stopColor="#991b1b" />
               </linearGradient>
+              {/* Foliage gradients for environment */}
+              <linearGradient id="hero-foliage-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#40916c" />
+                <stop offset="100%" stopColor="#1b4332" />
+              </linearGradient>
             </defs>
+
+            {/* Tea garden ground vegetation */}
+            <g opacity="0.85">
+              <ellipse cx="155" cy="430" rx="130" ry="22" fill="#2d6a4f" opacity="0.4" />
+              {/* Tea bushes at base */}
+              <circle cx="40" cy="410" r="32" fill="#40916c" opacity="0.7" />
+              <circle cx="70" cy="405" r="26" fill="#52b788" opacity="0.6" />
+              <circle cx="250" cy="415" r="28" fill="#2d6a4f" opacity="0.65" />
+              <circle cx="220" cy="408" r="22" fill="#40916c" opacity="0.55" />
+              {/* Grass blades */}
+              <path d="M 30,440 Q 33,415 28,400" stroke="#52b788" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+              <path d="M 40,442 Q 46,420 52,408" stroke="#40916c" strokeWidth="2" strokeLinecap="round" fill="none" />
+              <path d="M 240,440 Q 244,418 240,405" stroke="#52b788" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+              <path d="M 252,442 Q 258,422 264,410" stroke="#74c69d" strokeWidth="2" strokeLinecap="round" fill="none" />
+            </g>
 
             {/* Bamboo basket (Tokari) on her back */}
             <g id="hero-tea-basket-group" className="animate-pulse" style={{ animationDuration: '5s' }}>
@@ -87,11 +109,11 @@ const Hero = () => {
               <path d="M 200,174 Q 206,160 212,165 Q 207,175 200,174 Z" fill="#52b788" />
             </g>
             {/* Ground shadow */}
-            <ellipse cx="160" cy="370" rx="60" ry="12" fill="#1b4332" opacity="0.35" />
+            <ellipse cx="160" cy="438" rx="85" ry="10" fill="#1b4332" opacity="0.28" />
           </svg>
 
           {/* Heritage Tag */}
-          <div className="mt-3 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-emerald-300 shadow-md text-center flex items-center gap-1.5 justify-center">
+          <div className="mt-2 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-emerald-300 shadow-md text-center flex items-center gap-1.5 justify-center">
             <Leaf className="w-3 h-3 text-emerald-700" />
             <span className="text-[11px] font-extrabold text-emerald-950">Tea Garden Heritage</span>
           </div>
@@ -99,147 +121,86 @@ const Hero = () => {
       </motion.div>
 
       {/* ------------------------------------------------------------------ */}
-      {/* RIGHT FLANK (DESKTOP): AUTHENTIC KAZIRANGA ONE-HORNED RHINOCEROS */}
+      {/* RIGHT FLANK (DESKTOP): KAZIRANGA ONE-HORNED RHINOCEROS — PHOTO     */}
       {/* ------------------------------------------------------------------ */}
+      {/* SVG chroma-key filter defined once in the DOM */}
+      <svg style={{ position: 'absolute', width: 0, height: 0 }}>
+        <defs>
+          <filter id="rhino-remove-white" x="0%" y="0%" width="100%" height="100%">
+            {/* Convert near-white pixels to transparent */}
+            <feColorMatrix
+              type="matrix"
+              values="1 0 0 0 0
+                      0 1 0 0 0
+                      0 0 1 0 0
+                     -8 -8 -8 20 -5"
+            />
+          </filter>
+        </defs>
+      </svg>
       <motion.div
-        initial={{ opacity: 0, x: 40 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
-        className="hidden xl:flex flex-col items-center absolute right-3 2xl:right-10 bottom-10 2xl:bottom-14 z-20 pointer-events-auto select-none w-68 2xl:w-76"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1.0, ease: 'easeOut', delay: 0.3 }}
+        style={{ width: 'clamp(400px, 34vw, 640px)' }}
+        className="hidden xl:flex flex-col items-center absolute right-0 bottom-0 z-20 pointer-events-auto select-none"
       >
-        <div className="relative group cursor-pointer transition-transform duration-300 hover:scale-105">
-          {/* Subtle glow */}
-          <div className="absolute -inset-4 bg-emerald-600/15 blur-2xl rounded-full" />
+        <div className="relative group cursor-pointer transition-transform duration-300 hover:scale-[1.02] w-full">
+          {/* Soft ambient glow behind rhino */}
+          <div className="absolute -inset-8 bg-emerald-600/10 blur-3xl rounded-full pointer-events-none" />
 
-          {/* Tea Garden foliage background for Rhino */}
-          <svg viewBox="0 0 380 270" className="w-full h-auto drop-shadow-2xl overflow-visible">
-            <defs>
-              <linearGradient id="hero-rhino-body-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#64748b" />
-                <stop offset="40%" stopColor="#475569" />
-                <stop offset="100%" stopColor="#334155" />
-              </linearGradient>
-              <linearGradient id="hero-rhino-plate-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#526173" />
-                <stop offset="60%" stopColor="#3d4957" />
-                <stop offset="100%" stopColor="#252f3d" />
-              </linearGradient>
-              <linearGradient id="hero-horn-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#1e293b" />
-                <stop offset="50%" stopColor="#451a03" />
-                <stop offset="100%" stopColor="#78350f" />
-              </linearGradient>
-              <linearGradient id="hero-hill-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#2d6a4f" />
-                <stop offset="100%" stopColor="#1b4332" />
-              </linearGradient>
-            </defs>
+          {/* Vegetation framing — subtle grass blades behind rhino */}
+          <div className="absolute bottom-[52px] left-0 right-0 flex items-end justify-between px-2 pointer-events-none overflow-hidden" style={{ height: '80px' }}>
+            {/* Left grass cluster */}
+            <svg viewBox="0 0 80 80" style={{ width: '28%', height: 'auto' }} className="opacity-80">
+              <path d="M 10,80 Q 8,50 5,30" stroke="#2d6a4f" strokeWidth="3" strokeLinecap="round" fill="none" />
+              <path d="M 18,80 Q 20,55 28,38" stroke="#40916c" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+              <path d="M 28,80 Q 32,58 40,42" stroke="#52b788" strokeWidth="2" strokeLinecap="round" fill="none" />
+              <path d="M 5,80 Q 2,60 -2,45" stroke="#1b4332" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+              <circle cx="16" cy="68" r="14" fill="#40916c" opacity="0.5" />
+              <circle cx="35" cy="72" r="10" fill="#52b788" opacity="0.4" />
+            </svg>
+            {/* Right grass cluster */}
+            <svg viewBox="0 0 80 80" style={{ width: '28%', height: 'auto' }} className="opacity-80">
+              <path d="M 70,80 Q 72,50 75,30" stroke="#2d6a4f" strokeWidth="3" strokeLinecap="round" fill="none" />
+              <path d="M 62,80 Q 60,55 52,38" stroke="#40916c" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+              <path d="M 52,80 Q 48,58 40,42" stroke="#52b788" strokeWidth="2" strokeLinecap="round" fill="none" />
+              <path d="M 75,80 Q 78,60 82,45" stroke="#1b4332" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+              <circle cx="64" cy="68" r="14" fill="#40916c" opacity="0.5" />
+              <circle cx="45" cy="72" r="10" fill="#52b788" opacity="0.4" />
+            </svg>
+          </div>
 
-            {/* Rolling backdrop tea bushes & hills */}
-            <g id="hero-rhino-env" opacity="0.85">
-              <path d="M 40,240 Q 140,160 280,190 Q 340,205 380,180 L 380,250 L 40,250 Z" fill="url(#hero-hill-grad)" opacity="0.5" />
-              <circle cx="160" cy="190" r="22" fill="#40916c" opacity="0.6" />
-              <circle cx="200" cy="185" r="26" fill="#2d6a4f" opacity="0.7" />
-              <circle cx="240" cy="195" r="24" fill="#52b788" opacity="0.6" />
-            </g>
-
-            {/* Mud & grass ground shadow */}
-            <ellipse cx="200" cy="242" rx="145" ry="18" fill="#1b4332" opacity="0.35" />
-
-            {/* THE ONE-HORNED INDIAN RHINOCEROS */}
-            <g id="hero-rhino-character">
-              {/* Back legs (Far side) */}
-              <path d="M 115,165 L 112,238 L 132,238 L 134,180 Z" fill="#2d3748" />
-              <path d="M 255,170 L 252,238 L 270,238 L 273,180 Z" fill="#2d3748" />
-
-              {/* Tail with tuft */}
-              <path d="M 88,145 Q 75,165 78,195" stroke="#334155" strokeWidth="5" fill="none" strokeLinecap="round" />
-              <path d="M 77,190 Q 74,204 76,210" stroke="#1e293b" strokeWidth="6" strokeLinecap="round" />
-
-              {/* Heavy Quadruped Torso & Pelvic Armor Shield */}
-              <path
-                d="M 88,140 C 85,100 130,90 190,95 C 250,85 290,100 305,130 C 315,150 305,190 290,200 C 230,210 150,210 95,185 C 85,170 87,150 88,140 Z"
-                fill="url(#hero-rhino-body-grad)"
-              />
-
-              {/* Characteristic Indian Rhino Armor Skin Folds */}
-              {/* Scapular / Shoulder Groove */}
-              <path d="M 235,95 C 225,125 225,170 240,200" stroke="#1e293b" strokeWidth="6" strokeLinecap="round" fill="none" opacity="0.85" />
-              <path d="M 238,97 C 228,127 228,170 243,198" stroke="#94a3b8" strokeWidth="1.5" fill="none" opacity="0.5" />
-
-              {/* Flank / Rib Armor Fold */}
-              <path d="M 175,97 C 165,130 168,170 180,200" stroke="#1e293b" strokeWidth="5" strokeLinecap="round" fill="none" opacity="0.75" />
-
-              {/* Pelvic / Rump Fold */}
-              <path d="M 125,105 C 115,135 118,165 130,190" stroke="#1e293b" strokeWidth="5" strokeLinecap="round" fill="none" opacity="0.7" />
-
-              {/* Armor Tubercles (Characteristic bumpy texture) */}
-              <circle cx="105" cy="125" r="2.5" fill="#1e293b" opacity="0.6" />
-              <circle cx="115" cy="135" r="3" fill="#1e293b" opacity="0.6" />
-              <circle cx="108" cy="147" r="2.5" fill="#1e293b" opacity="0.6" />
-              <circle cx="255" cy="120" r="2.5" fill="#1e293b" opacity="0.6" />
-              <circle cx="265" cy="130" r="3" fill="#1e293b" opacity="0.6" />
-
-              {/* Near Front Leg with 3 hooves */}
-              <path d="M 275,165 L 270,242 L 292,242 L 298,175 Z" fill="url(#hero-rhino-plate-grad)" stroke="#1e293b" strokeWidth="2" />
-              <circle cx="274" cy="242" r="3.5" fill="#0f172a" />
-              <circle cx="281" cy="242" r="4" fill="#0f172a" />
-              <circle cx="288" cy="242" r="3.5" fill="#0f172a" />
-
-              {/* Near Hind Leg with 3 hooves */}
-              <path d="M 130,160 L 125,242 L 148,242 L 152,175 Z" fill="url(#hero-rhino-plate-grad)" stroke="#1e293b" strokeWidth="2" />
-              <circle cx="130" cy="242" r="3.5" fill="#0f172a" />
-              <circle cx="137" cy="242" r="4" fill="#0f172a" />
-              <circle cx="144" cy="242" r="3.5" fill="#0f172a" />
-
-              {/* Head & Neck */}
-              <g id="hero-rhino-head">
-                <path d="M 270,115 C 295,120 315,140 325,165 C 305,185 280,180 260,170 Z" fill="url(#hero-rhino-body-grad)" />
-                <path d="M 280,140 Q 295,160 285,177" stroke="#1e293b" strokeWidth="4" fill="none" opacity="0.8" />
-
-                {/* Head Silhouette */}
-                <path
-                  d="M 300,125 C 330,130 355,155 365,180 C 355,195 330,200 305,185 C 295,165 290,140 300,125 Z"
-                  fill="url(#hero-rhino-plate-grad)"
-                  stroke="#1e293b"
-                  strokeWidth="2"
-                />
-
-                {/* Small intelligent eye */}
-                <circle cx="320" cy="148" r="4.5" fill="#0f172a" />
-                <circle cx="321" cy="147" r="1.5" fill="#f8fafc" />
-                <path d="M 314,142 Q 320,139 326,143" stroke="#0f172a" strokeWidth="1.5" fill="none" />
-
-                {/* Ear with tuft */}
-                <path d="M 298,118 Q 302,96 309,102 Q 312,112 304,124 Z" fill="#475569" stroke="#1e293b" strokeWidth="1.5" />
-
-                {/* Single Iconic Indian Rhinoceros Horn */}
-                <path
-                  d="M 350,158 C 362,142 368,110 362,88 C 352,108 344,136 342,160 Z"
-                  fill="url(#hero-horn-grad)"
-                  stroke="#1e293b"
-                  strokeWidth="2"
-                />
-
-                {/* Prehensile upper lip & wide muzzle */}
-                <path d="M 358,185 Q 365,190 358,196 Q 346,197 342,190 Z" fill="#334155" stroke="#1e293b" strokeWidth="1" />
-                <ellipse cx="355" cy="186" rx="2" ry="3" fill="#0f172a" />
-              </g>
-            </g>
-
-            {/* Fresh Kaziranga elephant grass blades */}
-            <g id="hero-rhino-grass" stroke="#2d6a4f" strokeWidth="2.5" strokeLinecap="round">
-              <path d="M 120,245 Q 123,225 118,215" />
-              <path d="M 124,245 Q 130,228 135,218" stroke="#52b788" />
-              <path d="M 265,245 Q 268,222 262,212" />
-              <path d="M 272,245 Q 278,226 283,214" stroke="#74c69d" />
-              <path d="M 345,245 Q 352,215 360,200" stroke="#52b788" strokeWidth="3" />
-              <path d="M 355,245 Q 362,220 370,205" stroke="#40916c" strokeWidth="3" />
-            </g>
-          </svg>
+          {/* RHINO PHOTO — SVG filter removes white bg pixels regardless of stacking context */}
+          <div className="relative w-full" style={{
+            zIndex: "-1",
+            position:"relative",
+            left: "5%"
+          }}>
+            <img
+              src={rhinoImg}
+              alt="Kaziranga One-Horned Rhinoceros"
+              className="w-full h-auto object-contain"
+              style={{
+                filter: 'url(#rhino-remove-white) contrast(1.05) saturate(1.08)',
+                
+              }}
+              draggable={false}
+            />
+            {/* Subtle ground shadow beneath the rhino */}
+            <div
+              className="absolute bottom-[52px] left-1/2 -translate-x-1/2 pointer-events-none"
+              style={{
+                width: '75%',
+                height: '18px',
+                background: 'radial-gradient(ellipse at center, rgba(27,67,50,0.30) 0%, transparent 72%)',
+                filter: 'blur(4px)',
+              }}
+            />
+          </div>
 
           {/* Heritage Tag */}
-          <div className="mt-3 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-emerald-300 shadow-md text-center flex items-center gap-1.5 justify-center">
+          <div className="mt-1 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-emerald-300 shadow-md text-center flex items-center gap-1.5 justify-center">
             <Shield className="w-3 h-3 text-emerald-700" />
             <span className="text-[11px] font-extrabold text-emerald-950">One-Horned Rhino • Kaziranga</span>
           </div>
